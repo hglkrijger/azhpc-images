@@ -27,8 +27,8 @@
             },
             "aarch64": {
                 "version": "3.2.1",
-                "sha256": "748ddd8a7445f5821423a10f9c26e6d17625286676d2e2a88bea56b0b2a6e3d4",
-                "url": "https://www.mellanox.com/downloads/DOCA/DOCA_v3.2.1/host/doca-host_3.2.1-044000-25.10-ubuntu2404_arm64.deb"
+                "sha256": "9bf6bda1f757b178a80dd9cdefa60bea154e721c2b007e01686e3dd6a19c9d20",
+                "url": "https://www.mellanox.com/downloads/DOCA/DOCA_v3.2.1/host/doca-host_3.2.1-044413-25.10-ubuntu2404_arm64.deb"
             }
         },
         "ubuntu24.04-aks": {
@@ -228,22 +228,22 @@
             },
             "aarch64":{
                 "driver": {
-                    "version": "580.105.08",
+                    "version": "580.126.20",
                     "major_version": "580"
                 },
                 "imex": {
-                    "version": "580.105.08-1"
+                    "version": "580.126.20-1"
                 }
             }
         },
         "ubuntu24.04-aks": {
             "aarch64": {
                 "driver": {
-                    "version": "580.105.08",
+                    "version": "580.126.20",
                     "major_version": "580"
                 },
                 "imex": {
-                    "version": "580.105.08-1"
+                    "version": "580.126.20-1"
                 }
             }
         },
