@@ -228,22 +228,22 @@
             },
             "aarch64":{
                 "driver": {
-                    "version": "580.105.08",
+                    "version": "580.126.20",
                     "major_version": "580"
                 },
                 "imex": {
-                    "version": "580.105.08-1"
+                    "version": "580.126.20-1"
                 }
             }
         },
         "ubuntu24.04-aks": {
             "aarch64": {
                 "driver": {
-                    "version": "580.105.08",
+                    "version": "580.126.20",
                     "major_version": "580"
                 },
                 "imex": {
-                    "version": "580.105.08-1"
+                    "version": "580.126.20-1"
                 }
             }
         },
