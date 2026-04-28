@@ -16,11 +16,13 @@ export ARCHITECTURE=$(uname -m)
 
 if [[ $DISTRIBUTION == *"ubuntu"* ]]; then
     # Don't allow the kernel to be updated
-    # if [ "$SKU" = "GB200" ]; then
-    #    apt-mark hold linux-nvidia-64k-hwe-24.04
-    # else
-    #    apt-mark hold linux-azure
-    # fi
+    # Hold the kernel metapackage to prevent upgrades. In offline/ISO contexts
+    # the package may not be installed, so apt-mark hold would fail — allow that.
+    if [ "$SKU" = "GB200" ]; then
+        apt-mark hold linux-azure-nvidia 2>/dev/null || echo "WARNING: could not hold linux-azure-nvidia (may not be installed)" >&2
+    else
+        apt-mark hold linux-azure-${KERNEL_VERSION:-6.8} 2>/dev/null || echo "WARNING: could not hold linux-azure-${KERNEL_VERSION:-6.8} (may not be installed)" >&2
+    fi
     # upgrade pre-installed components
     # GB200 offline installer: Skip apt upgrade when running from offline ISO.
     # The upgrade pulls packages from online mirrors that may be unavailable,

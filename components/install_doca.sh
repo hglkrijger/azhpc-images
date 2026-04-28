@@ -69,11 +69,18 @@ fi
 systemctl daemon-reload
 systemctl enable openibd
 
-/etc/init.d/openibd restart
-/etc/init.d/openibd status
-error_code=$?
-if [ ${error_code} -ne 0 ]
-then
-    echo "OpenIBD not loaded correctly!"
-    exit ${error_code}
+# openibd restart may fail if ib_ipoib is blacklisted (e.g. GB300 where IPoIB
+# is intentionally disabled). In that case the DOCA/OFED packages are still
+# installed correctly — only the runtime module load is affected. Fail only
+# for unexpected errors.
+if ! /etc/init.d/openibd restart; then
+    if grep -qsE '^(blacklist[[:space:]]+ib_ipoib|install[[:space:]]+ib_ipoib[[:space:]]+/bin/(true|false))' /etc/modprobe.d/*.conf 2>/dev/null; then
+        echo "WARNING: openibd restart failed due to ib_ipoib blacklist; continuing (DOCA packages installed successfully)" >&2
+    else
+        echo "ERROR: openibd restart failed unexpectedly" >&2
+        /etc/init.d/openibd status 2>&1 || true
+        exit 1
+    fi
+else
+    /etc/init.d/openibd status
 fi
