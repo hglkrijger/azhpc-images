@@ -40,6 +40,9 @@ $COMPONENT_DIR/install_pmix.sh
 # install mpi libraries
 $COMPONENT_DIR/install_mpis.sh
 
+# install mpifileutils
+$COMPONENT_DIR/install_mpifileutils.sh
+
 # install nvidia gpu driver
 $COMPONENT_DIR/install_nvidiagpudriver.sh
 
@@ -57,6 +60,9 @@ $COMPONENT_DIR/install_amd_libs.sh
 
 # install Intel libraries
 $COMPONENT_DIR/install_intel_libs.sh
+
+# install dynolog and dyno-relay-logger
+$COMPONENT_DIR/install_dynolog_drl.sh
 
 # cleanup downloaded tarballs - clear some space
 rm -rf *.tgz *.bz2 *.tbz *.tar.gz *.run *.deb *_offline.sh

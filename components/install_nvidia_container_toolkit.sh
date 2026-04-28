@@ -21,16 +21,14 @@ if [[ $DISTRIBUTION == *"ubuntu"* ]]; then
 
     # Remove unwanted repos
     rm -f /etc/apt/sources.list.d/nvidia*
-elif [[ $DISTRIBUTION == almalinux* ]]; then
+elif [[ $DISTRIBUTION == "azurelinux3.0" ]]; then
+    tdnf install --noplugins -y nvidia-container-toolkit-base nvidia-container-toolkit
+    tdnf install --noplugins -y nvidia-container-runtime
+    sed -i "$ s/$/ *nvidia-container*/" /etc/dnf/dnf.conf
+else
+    # RHEL-family: AlmaLinux, Rocky Linux, RHEL, etc.
     curl -s -L https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo | \
     sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
-
-    # Enable these lines if you want use experimental repo
-    # if [[ $DISTRIBUTION == almalinux8.10 ]]; then
-    #    yum-config-manager --enable nvidia-container-toolkit-experimental
-    # elif [[ $DISTRIBUTION == almalinux9* ]]; then
-    #    dnf config-manager --enable nvidia-container-toolkit-experimental
-    # fi
 
     yum update -y
 
@@ -42,12 +40,8 @@ elif [[ $DISTRIBUTION == almalinux* ]]; then
 
     # Clean repos
     rm -rf /etc/yum.repos.d/nvidia-*
-    rm -rf /var/cache/yum/x86_64/8/nvidia-*
-    rm -rf /var/cache/yum/x86_64/8/libnvidia-container/
-elif [[ $DISTRIBUTION == "azurelinux3.0" ]]; then
-    tdnf install --noplugins -y nvidia-container-toolkit-base nvidia-container-toolkit
-    tdnf install --noplugins -y nvidia-container-runtime
-    sed -i "$ s/$/ *nvidia-container*/" /etc/dnf/dnf.conf
+    rm -rf /var/cache/yum/x86_64/*/nvidia-*
+    rm -rf /var/cache/yum/x86_64/*/libnvidia-container/
 fi
 
 # Configure NVIDIA Container Toolkit
@@ -57,15 +51,24 @@ nvidia-ctk runtime configure --runtime=docker
 mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml
 
-if [[ $DISTRIBUTION == *"ubuntu"* ]] || [[ $DISTRIBUTION == *"almalinux"* ]]; then
+if [[ $DISTRIBUTION == *"ubuntu"* ]] || [[ $DISTRIBUTION == *"almalinux"* ]] || [[ $DISTRIBUTION == *"rocky"* ]] || [[ $DISTRIBUTION == *"rhel"* ]]; then
     sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml  
 fi
 nvidia-ctk runtime configure --runtime=containerd --set-as-default
 if [ "$SKU" == "GB200" ]; then
     sed -i 's/enable_cdi = false/enable_cdi = true/g' /etc/containerd/config.toml
-    sed -i 's/enable_cdi = false/enable_cdi = true/g' /etc/containerd/conf.d/*.toml
+    sed -i 's/enable_cdi = false/enable_cdi = true/g' /etc/containerd/conf.d/*.toml 2>/dev/null || true
 fi
 if [[ $DISTRIBUTION == "azurelinux3.0" ]]; then
-    sed -i '/\[plugins\.\"io\.containerd\.cri\.v1\.runtime\".containerd\.runtimes\.runc\.options\]/a \ \ \ \ \ \ \ \ \ \ \ \ SystemdCgroup = true' /etc/containerd/config.toml
-    sed -i '/\[plugins\.\"io\.containerd\.cri\.v1\.runtime\".containerd\.runtimes\.nvidia\.options\]/a \ \ \ \ \ \ \ \ \ \ \ \ SystemdCgroup = true' /etc/containerd/config.toml
+    # Enable SystemdCgroup for runc and nvidia runtimes.
+    # containerd 2.1.5+ includes SystemdCgroup in its default config
+    # (see https://github.com/containerd/containerd/pull/12244), so we
+    # replace false to true. Older versions omit the key entirely, so we
+    # append it instead.
+    if grep -q 'SystemdCgroup' /etc/containerd/config.toml; then
+        sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+    else
+        sed -i '/\[plugins\.\"io\.containerd\.cri\.v1\.runtime\".containerd\.runtimes\.runc\.options\]/a \ \ \ \ \ \ \ \ \ \ \ \ SystemdCgroup = true' /etc/containerd/config.toml
+        sed -i '/\[plugins\.\"io\.containerd\.cri\.v1\.runtime\".containerd\.runtimes\.nvidia\.options\]/a \ \ \ \ \ \ \ \ \ \ \ \ SystemdCgroup = true' /etc/containerd/config.toml
+    fi
 fi

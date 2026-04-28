@@ -25,10 +25,10 @@ if [ "$SKU" != "GB200" ]; then
     # update cmake
     $COMPONENT_DIR/install_cmake.sh
 
-    # install Lustre client
-    # Note that lustre client is supported on GB200 but amlfs does not support latest 6.14 kernel so we temporarily skip it
-    $COMPONENT_DIR/install_lustre_client.sh
 fi
+
+# install Lustre client
+$COMPONENT_DIR/install_lustre_client.sh
 
 # install DOCA OFED
 $COMPONENT_DIR/install_doca.sh
@@ -39,6 +39,9 @@ $COMPONENT_DIR/install_pmix.sh
 # install mpi libraries
 $COMPONENT_DIR/install_mpis.sh
 
+# install mpifileutils
+$COMPONENT_DIR/install_mpifileutils.sh
+
 if [ "$GPU" = "NVIDIA" ]; then
     # install nvidia gpu driver
 
@@ -47,10 +50,10 @@ if [ "$GPU" = "NVIDIA" ]; then
         ./install_nvidiagpudriver_gb200.sh
 
         # Install NVSHMEM
-        ./install_nvshmem_gb200.sh
+        $COMPONENT_DIR/install_nvshmem.sh
 
         # Install NVLOOM
-        ./install_nvloom_gb200.sh
+        $COMPONENT_DIR/install_nvloom.sh
 
         # Install NVBandwidth tool
         $COMPONENT_DIR/install_nvbandwidth_tool.sh
@@ -89,6 +92,9 @@ if [ "$ARCHITECTURE" == "x86_64" ]; then
     # install Intel libraries
     $COMPONENT_DIR/install_intel_libs.sh
 fi
+
+# install dynolog and dyno-relay-logger
+$COMPONENT_DIR/install_dynolog_drl.sh
 
 # cleanup downloaded tarballs - clear some space
 rm -rf *.tgz *.bz2 *.tbz *.tar.gz *.run *.deb *_offline.sh
